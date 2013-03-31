@@ -14,5 +14,8 @@ app = Flask(__name__.split('.')[0])
 app.config.from_pyfile('../config.py')
 db = SQLAlchemy(app)
 
+from flaskext.auth import Auth
+auth = Auth(app)
+
 import api
 import routes
