@@ -90,7 +90,7 @@ def dologin():
             # Authenticate and log in!
             if app.users[username].authenticate(request.form['password']):
                 return redirect(url_for('home'))
-        return 'Failure :('
+        flash("Login failed", "error")
     return render_template('login.html')
 
 
