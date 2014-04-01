@@ -10,6 +10,8 @@ curdir = os.path.dirname(__file__)
 
 base_url = "http://localhost:5000/"
 
+class ShouldHaveRaisedError(Exception): pass
+
 def clear_survey(org_id):
     dqtool_path = os.path.join(curdir, "dqtool")
     subprocess.call([dqtool_path, 
@@ -95,9 +97,34 @@ class TrySurvey(Survey):
             "pwyffinal": setup_ordinals
             }
 
+def setup_ordinals_blank(self):
+    self.br["1-ordinal_value"] = "a"
+    self.br["2-ordinal_value"] = "s"
+    self.br["3-ordinal_value"] = "d"
+
+
+class TrySurveyWithBlankCommitments(Survey):
+    def __init__(self, *args):
+        super(TrySurveyWithBlankCommitments, self).__init__(*args)
+        self.handlers = {
+            "researcher": setup_ordinals_blank,
+            "pwyffinal": setup_ordinals_blank
+            }
+
+
+
 def main(org_id, username, password):
     survey = TrySurvey(org_id, username, password)
     survey.run()
+
+    survey = TrySurveyWithBlankCommitments(org_id, username, password)
+    try:
+        survey.run()
+        raise ShouldHaveRaisedError
+    except:
+        pass
+    
+
 
 def run():
     p = OptionParser()
