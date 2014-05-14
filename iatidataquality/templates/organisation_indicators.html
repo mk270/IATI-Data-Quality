@@ -2,15 +2,6 @@
 {% block title %}{{organisation.organisation_name}} &raquo; Organisations{% endblock %}
 {% block content %}
 
-    <script src="{{url_for('static', filename='jquery.tablesorter.min.js')}}"></script>
-    <script >
-    $(function() {
-    $("table#results_iati").tablesorter({ sortList: [[0,0],[1,0],[2,0]] });
-    $("table#results_noniati").tablesorter({ sortList: [[0,0],[1,0],[2,0]] });
-    });
-
-    </script>
-
     <h1><a href="{{url_for('organisations', organisation_code=organisation.organisation_code)}}">{{organisation.organisation_name}}</a></h1>
 
     {% if results %}
@@ -72,8 +63,17 @@
             <h3>Frequency of publication</h3>
             <p class="lead">It looks like you publish less often than
             quarterly, so the maximum you can score for IATI data is
-            95 points. The total points for the relevant indicators have been
+            75 points. The total points for the relevant indicators have been
             adjusted accordingly.</p>
+        </div>
+        {% set freq=0.5 %}
+        {% elif organisation.frequency == "quarterly" %}
+        <div class="alert alert-info">
+            <h3>Frequency of publication</h3>
+            <p class="lead">It looks like you publish quarterly and not monthly,
+            so the maximum you can score for IATI data is 95 points. The total 
+            points for the relevant indicators have been adjusted 
+            accordingly.</p>
         </div>
         {% set freq=0.9 %}
         {% else %}
@@ -100,7 +100,8 @@
             <tr id="indicator-{{result["indicator"]["id"]}}">
             <td>{{result.indicator.indicator_category_name|title}}</td>
             <td>{{result.indicator.indicator_subcategory_name|title}}</td>
-            <td><a href="#indicator{{result["indicator"]["id"]}}" role="button" data-toggle="modal">{{result["indicator"]["description"]}}</a>
+            <td><a href="#indicator{{result["indicator"]["id"]}}" role="button" data-toggle="modal">
+                {{result["indicator"]["indicator_order"]}}. {{result["indicator"]["description"]}}</a>
                 <div id="indicator{{result["indicator"]["id"]}}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="indicatorHeader" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -171,7 +172,7 @@
                 </div>
             </td>
             <td></td>
-            <td><a href="#" class="showTests" id="showindicator-{{result.indicator.id}}"><i class="icon-chevron-down"></i></a></td>
+            <td><a href="#" class="showTests" id="showindicator-{{result.indicator.id}}"><i class="icon-chevron-down align-right"></i></a></td>
             </tr>
 
             {% for testdata in result["tests"] %}
@@ -270,7 +271,8 @@
             <tr id="indicator-{{result["indicator"]["id"]}}">
             <td>{{result.indicator.indicator_category_name|title}}</td>
             <td>{{result.indicator.indicator_subcategory_name|title}}</td>
-            <td><a href="#indicator{{result["indicator"]["id"]}}" role="button" data-toggle="modal">{{result["indicator"]["description"]}}</a>
+            <td><a href="#indicator{{result["indicator"]["id"]}}" role="button" data-toggle="modal">
+                {{result["indicator"]["indicator_order"]}}. {{result["indicator"]["description"]}}</a>
                 <div id="indicator{{result["indicator"]["id"]}}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="indicatorHeader" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -303,7 +305,7 @@
             No survey data yet.
             </td>
             {% endif %}
-            <td><a href="#" class="showTests" id="showindicator-{{result["indicator"]["id"]}}"><i class="icon-chevron-down"></i></a></td>
+            <td><a href="#" class="showTests" id="showindicator-{{result["indicator"]["id"]}}"><i class="icon-chevron-down align-right"></i></a></td>
             </tr>
             
             {% for testdata in result["tests"] %}

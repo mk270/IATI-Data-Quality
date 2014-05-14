@@ -12,6 +12,8 @@ import itertools
 import models # damn!
 import pprint
 
+class NoRelevantResults(Exception): pass
+
 def reform_dict(d):
     def inner(k1):
         matches_first = lambda i: i[0] == k1
@@ -117,10 +119,27 @@ def publisher_simple(out, cdtns):
         def relevant(hierarchy):
             key = (t,'activity hierarchy', str(hierarchy)) 
 
-            return (
-                ((not cdtns) or (cdtns.get(key, {}).get(0, None) != 0))
-                and 
-                (t in out[hierarchy])
+            if t not in out[hierarchy]:
+                return False
+
+            if not cdtns:
+                return True
+
+            if key not in cdtns:
+                return True
+
+            if cdtns[key][0] == 0:
+                return False
+
+            return True
+
+        # This makes sure information about a test is returned.
+        def get_okhierarchy(out, t):
+            for h in out:
+                if (t in out[h] and 'test' in out[h][t]):
+                    return h
+            raise NoRelevantResults(
+                "Summary could not be generated for test %d" % t
                 )
 
         for hierarchy in filter(relevant, hierarchies):
@@ -132,8 +151,14 @@ def publisher_simple(out, cdtns):
                 test_info["results_pct"] * 
                 test_info["results_num"]
                 )
-            ## FIXME: all okhieriarcy values are identical
-            okhierarchy = hierarchy
+
+        if results_num == 0:
+            raise NoRelevantResults("Results_num == 0 for test: %d" % t)
+
+        # Result aggregation throws away hierarchies if there are 0 results.
+        # This means some hierarchies won't have the 'test' dict. But, at
+        # least one must, because we wouldn't be here otherwise.
+        okhierarchy = get_okhierarchy(out, t)
 
         tmp = make_summary(
             out[okhierarchy][t]['test']["id"],
